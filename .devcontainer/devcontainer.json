@@ -1,0 +1,19 @@
+{
+  "name": "Ollama Development Environment",
+  "dockerComposeFile": "docker-compose.yaml",
+  "service": "dev",
+  "workspaceFolder": "/workspace",
+  
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-tools.jupyter"
+      ]
+    }
+  },
+  
+  "postCreateCommand": ".devcontainer/setup.sh",
+  
+  "remoteUser": "klab"
+}

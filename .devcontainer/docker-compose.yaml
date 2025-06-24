@@ -1,0 +1,36 @@
+version: '3.8'
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        USERNAME: klab
+        GROUPNAME: klab
+        UID: 1000
+        GID: 1000
+    container_name: ollama_dev
+    volumes:
+      - ollama:/home/klab/.ollama
+      - ../:/workspace
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    ports:
+      - "11434:11434"
+    networks:
+      - ollama-network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+volumes:
+  ollama:
+    external: true
+
+networks:
+  ollama-network:
+    driver: bridge
