@@ -169,11 +169,13 @@ Directory structure:
 
 For each action you want to take, use the following format:
 - To read a file: READ_FILE: filename
-- To write a file: WRITE_FILE: filename
+- To write/create a file: WRITE_FILE: filename
 ```
 file content here
 ```
 - To run a command: RUN_COMMAND: command
+
+IMPORTANT: Use exactly "WRITE_FILE:" (not CREATE_FILE or other variations) followed by the filename.
 
 Task: {task}
 
@@ -198,8 +200,13 @@ Think step by step and take actions as needed. Always explain what you're doing 
                 print(f"File content preview:\\n{content[:500]}{'...' if len(content) > 500 else ''}\\n")
                 actions_taken.append(f"Read {filepath}")
                 
-            elif line.startswith("WRITE_FILE:"):
-                filepath = line.replace("WRITE_FILE:", "").strip()
+            elif line.startswith("WRITE_FILE:") or line.startswith("CREATE_FILE:"):
+                # WRITE_FILE: と CREATE_FILE: の両方に対応
+                if line.startswith("WRITE_FILE:"):
+                    filepath = line.replace("WRITE_FILE:", "").strip()
+                else:
+                    filepath = line.replace("CREATE_FILE:", "").strip()
+                    
                 print(f"✏️  Writing file: {filepath}")
                 
                 # 次の```までのコンテンツを取得
