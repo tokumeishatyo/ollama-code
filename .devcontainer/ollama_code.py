@@ -216,19 +216,52 @@ Think step by step and take actions as needed. Always explain what you're doing 
                 
                 while i < len(lines):
                     current_line = lines[i]
-                    if current_line.strip() == "```" and not in_code_block:
+                    
+                    # コードブロック開始の検出（```または```python等）
+                    if (current_line.strip().startswith("```") or 
+                        current_line.strip() == "```" or
+                        current_line.strip().startswith("```python") or
+                        current_line.strip().startswith("```bash")) and not in_code_block:
                         in_code_block = True
                     elif current_line.strip() == "```" and in_code_block:
                         break
                     elif in_code_block:
                         content_lines.append(current_line)
+                    elif not in_code_block and current_line.strip():
+                        # コードブロックがない場合、次の非空行をコンテンツとして扱う
+                        content_lines.append(current_line)
+                        # 連続する行を収集
+                        while i + 1 < len(lines) and lines[i + 1].strip() and not lines[i + 1].startswith("-"):
+                            i += 1
+                            if not lines[i].startswith("- ") and not lines[i].startswith("Now "):
+                                content_lines.append(lines[i])
+                            else:
+                                i -= 1
+                                break
+                        break
                     i += 1
                 
                 if content_lines:
                     content = "\\n".join(content_lines)
+                    # **name**を__name__に修正
+                    content = content.replace("**name**", "__name__")
                     result = self.write_file(filepath, content)
                     print(result)
                     actions_taken.append(f"Wrote {filepath}")
+                else:
+                    # コンテンツがない場合はデフォルトテンプレートを作成
+                    default_content = '''#!/usr/bin/env python3
+
+def main():
+    """Main entry point for the application."""
+    print("Hello, World!")
+
+if __name__ == "__main__":
+    main()
+'''
+                    result = self.write_file(filepath, default_content)
+                    print(f"{result} (using default template)")
+                    actions_taken.append(f"Wrote {filepath} (default template)")
                 
             elif line.startswith("RUN_COMMAND:"):
                 command = line.replace("RUN_COMMAND:", "").strip()
